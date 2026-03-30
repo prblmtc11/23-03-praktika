@@ -1,0 +1,160 @@
+#ifndef VECTOR_HPP
+#define VECTOR_HPP
+
+#include <stdexcept>
+#include <cstddef>
+
+namespace topit {
+  template < class T >
+  struct Vector
+  {
+    Vector();
+    Vector(size_t s, const T& v);
+    ~Vector();
+    Vector(const Vector<T>&) = delete;
+    Vector<T>& operator=(const Vector<T>&) = delete;
+
+    bool isEmpty() const noexcept;
+    size_t getSize() const noexcept;
+    size_t getCapacity() const noexcept;
+
+    void push_back(const T& val);
+
+    T& operator[](size_t id) noexcept;
+    const T& operator[](size_t id) const noexcept;
+    T& at(size_t id);
+    const T& at(size_t id) const;
+    private:
+    T* data_;
+    size_t size_, capacity_;
+    explicit Vector(size_t s);
+  };
+
+  template<class T>
+  bool operator==(const Vector<T>& lhs, const Vector<T>& rhs);
+  template<class T>
+  bool operator!=(const Vector<T>& lhs, const Vector<T>& rhs);
+}
+
+template < class T >
+topit::Vector<T>::Vector(size_t size, const T& val):
+  Vector(size)
+{
+  for (size_t i = 0; i < size; ++i)
+  {
+    try {
+      data_[i] = val;
+    }
+    catch (...) {
+      delete[] data_;
+      throw;
+    }
+  }
+}
+
+template < class T >
+T& topit::Vector<T>::at(size_t id)
+{
+  if (id < getSize())
+  {
+    return data_[id];
+  }
+  throw std::out_of_range("bad id");
+}
+
+template < class T >
+const T& topit::Vector<T>::at(size_t id) const
+{
+  if (id < getSize())
+  {
+    return data_[id];
+  }
+  throw std::out_of_range("bad id");
+}
+
+template < class T >
+topit::Vector<T>::Vector(size_t size):
+  data_(size ? new T[size] : nullptr),
+  size_(size),
+  capacity_(size)
+{}
+
+template< class T >
+T& topit::Vector<T>::operator[](size_t id) noexcept
+{
+  return data_[id];
+}
+
+template< class T >
+const T& topit::Vector<T>::operator[](size_t id) const noexcept
+{
+  return data_[id];
+}
+
+template < class T >
+topit::Vector<T>::Vector() :
+  data_(nullptr),
+  size_(0),
+  capacity_(0)
+{}
+template < class T >
+topit::Vector<T>::~Vector()
+{
+  delete[] data_;
+}
+template< class T >
+bool topit::Vector<T>::isEmpty() const noexcept
+{
+  return !size_;
+}
+template< class T >
+size_t topit::Vector<T>::getSize() const noexcept
+{
+  return size_;
+}
+template< class T >
+size_t topit::Vector<T>::getCapacity() const noexcept
+{
+  return capacity_;
+}
+template< class T >
+void topit::Vector<T>::push_back(const T& val)
+{
+  if (size_ == capacity_)
+  {
+    size_t new_capacity = (capacity_ == 0) ? 1 : capacity_ * 2;
+    T* new_data = new T[new_capacity];
+    for (size_t i = 0; i < size_; ++i)
+    {
+      new_data[i] = data_[i];
+    }
+    delete[] data_;
+    data_ = new_data;
+    capacity_ = new_capacity;
+  }
+  data_[size_] = val;
+  ++size_;
+}
+template<class T>
+bool topit::operator==(const Vector<T>& lhs, const Vector<T>& rhs)
+{
+  if (lhs.getSize() != rhs.getSize())
+  {
+    return false;
+  }
+  for (size_t i = 0; i < lhs.getSize(); ++i)
+  {
+    if (lhs[i] != rhs[i])
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+template<class T>
+bool topit::operator!=(const Vector<T>& lhs, const Vector<T>& rhs)
+{
+  return !(lhs == rhs);
+}
+#endif
